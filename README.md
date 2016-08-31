@@ -1,2 +1,12 @@
-# academica
-untuk pelatihan django di ilmu komputer upi
+# Academica
+
+Contoh proyek untuk pelatihan Django di ilmu komputer upi
+
+* Models
+* Migration
+* Admin
+* URLs
+* Views
+* Templates
+* ModelForm
+* Authentication
