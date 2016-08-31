@@ -1,0 +1,27 @@
+<h1>Silahkan Login</h1>
+
+<form action="/login/" method="POST" role="form">
+	{% csrf_token %}
+
+	{% if messages %}
+              <ul>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+	
+	Username: 
+	
+	<input type="text" name="username" value="" placeholder="username anda..." />
+
+	<br/>
+	<br/>
+
+	Password: 
+	<input type="password" name="password" value="" placeholder="password anda..." />
+	
+	<br/>
+	<br/>
+	<input href="javascript:void(0);" value="Log In" type="submit"/>
+</form>

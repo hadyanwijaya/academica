@@ -1,0 +1,53 @@
+<h1>Edit Profil Anda</h1>
+
+<form id="new-artist-form" action="/profil/edit" method="POST" role="form">
+	{% csrf_token %}
+	
+	{% if user_form.errors %}
+		{{ user_form.errors }}
+	{% endif %}
+
+	{% if akun_form.errors %}
+		{{ akun_form.errors }}
+	{% endif %}
+	
+	Nama Depan: 
+	{{ user_form.first_name }}
+
+	<br/>
+	<br/>
+
+	Nama Belakang: 
+	{{ user_form.last_name }}
+	
+	<br/>
+	<br/>
+
+	E-Mail: 
+	{{ user_form.email }}
+	
+	<br/>
+    <br/>
+
+    No. Telepon: 
+    {{ akun_form.no_telp }}
+	
+	<br/>
+    <br/>
+	
+	Website: 
+	{{ akun_form.website }}
+	
+	<br/>
+    <br/>
+
+	Alamat: 
+	<br/>
+	{{ akun_form.alamat }}
+	
+	<br/>
+    <br/>
+    
+	<input href="javascript:void(0);" value="Simpan" type="submit"/>
+	<a href="/profil">Batal</a>
+</form>

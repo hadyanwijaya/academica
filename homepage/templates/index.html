@@ -1,0 +1,24 @@
+<h1>Daftar Nilai</h1>
+
+Hi, {{ request.session.username }} | <a href="/profil/">Profil</a> | <a href="/logout/">Log out</a> | 
+
+<br/> <br/>
+
+<table border="1">
+	<thead>
+		<tr>
+			<th>No.</th>
+			<th>Kontrak Kuliah</th>
+			<th>Nilai Terakhir</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for kontrak in daftar_kontrak_kuliah %}
+		<tr>
+			<td>{{ forloop.counter }}</td>
+			<td>{{ kontrak.jadwal_kuliah.nama }}</td>
+			<td>{{ kontrak.nilai_akhir }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
