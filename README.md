@@ -10,3 +10,4 @@ Contoh proyek untuk pelatihan Django di ilmu komputer upi
 * Templates
 * ModelForm
 * Authentication
+* Functional Testing with Django Test Client
