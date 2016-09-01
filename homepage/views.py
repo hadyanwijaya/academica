@@ -70,7 +70,11 @@ def profil_edit(request):
 			user.save()
 
 			akun = Akun.objects.get(user=user)
-
+			akun.no_telp = request.POST['no_telp']
+			akun.website = request.POST['website']
+			akun.alamat = request.POST['alamat']
+			akun.save()
+			
 			return redirect('/profil')
 	else:
 		user_form = UserForm(instance=user)
