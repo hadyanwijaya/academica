@@ -4,6 +4,14 @@ from django.contrib.auth.models import User
 from akses.models import *
 from tatausaha.models import *
 
+
+"""
+coverage run --rcfile='.coveragerc' --source='.' manage.py test
+
+DJANGO_SETTINGS_MODULE=academica.settings coverage html --rcfile='.coveragerc'
+
+"""
+
 # Create your tests here.
 class HomepageTest(TestCase):
 	def setUp(self):
@@ -11,13 +19,23 @@ class HomepageTest(TestCase):
 		user.email = "ridwanbejo@gmail.com"
 		user.save()
 
+		mahasiswa = Mahasiswa.objects.create(nama="Ridwan Bejo")
+		mahasiswa.save()
+
+		akun = Akun.objects.create(mahasiswa=mahasiswa, user=user, no_telp="7501234", alamat="bandung", website="http://poss.cs.upi.edu")
+		akun.save()
+
 		self.user = user
 		self.client = Client()
 
-	def test_do_login(self):
+	def test_view_login(self):
 		response = self.client.get('/login/')
 		self.assertEqual(response.status_code, 200)
 
+	def test_do_login(self):
+		response = self.client.post('/login/', {'username':'ridwanbejo', 'password':'rahasia123'}, follow=True)
+		self.assertEqual(response.status_code, 200)
+	
 	def test_view_daftar_nilai(self):
 		self.client.login(username='ridwanbejo', password='rahasia123')
 		response = self.client.get('/', follow=True)

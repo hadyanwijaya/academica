@@ -1,1 +1,12 @@
 <h1>Profil Anda</h1>
+
+Hi, {{ request.session.username }} | <a href="/">Home</a> |  <a href="/profil/edit">Edit Profil</a> | <a href="/logout/">Log out</a> |
+
+<ul>
+	<li>Nama Depan: {{ user.first_name }}</li>
+	<li>Nama Belakang: {{ user.last_name }}</li>
+	<li>E-Mail: {{ user.email }}</li>
+	<li>No. Telepon: {{ akun.no_telp }}</li>
+	<li>Website: {{ akun.website }}</li>
+	<li>Alamat: {{ akun.alamat }}</li>
+</ul>

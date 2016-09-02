@@ -50,7 +50,9 @@ def daftar_nilai(request):
 
 @login_required(login_url=settings.LOGIN_URL)
 def profil(request):
-	return render(request, 'profil.html')
+	user = request.user
+	akun = Akun.objects.get(user=user)
+	return render(request, 'profil.html', {'user':user, 'akun':akun})
 
 @login_required(login_url=settings.LOGIN_URL)
 def profil_edit(request):
