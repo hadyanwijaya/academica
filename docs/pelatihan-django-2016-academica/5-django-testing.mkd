@@ -1,0 +1,201 @@
+#Pelatihan Django 2016 #5 - Melakukan Testing Sederhana
+
+*Software testing* merupakan salah satu perangkat penting dalam siklus pengembangan perangkat lunak, dalam pengembangan aplikasi *web* pun tentu saja tidak lepas dari *software testing*. Salah satu *testing* yang paling banyak digunakan adalah *blackbox testing* dimana seorang *software tester* menguji berbagai skenario terhadap *user interface* aplikasi *web* yang akan diuji. Kemudian *software tester* akan menulis *checklist* fitur atau spesifikasi mana sajakah yang tidak memenuhi kriteria.
+
+Sayangnya salah satu bagian penting dari pengembangan perangkat lunak ini tidak pernah diajarkan dengan baik di dunia akademis. Pengujian hanya dibatasi hingga *blackbox testing*, sedangkan industri saat ini kian membutuhkan suatu kemampuan yang dinamakan dengan *automated software testing*. Django memiliki sebuah modul yang dinamakan dengan **django.test** yang di dalamnya terdapat berbagai perangkat seperti **TestCase** dan **Client**. Anda dapat menguji berbagai seluk beluk aplikasi *web* yang Anda kembangkan sebelum akhirnya dirilis ke pasar.
+
+Mengapa melakukan *automated software testing*? Bayangkan saja apabila ada 10 fitur yang harus diuji ulang ketika menambah 5 fitur baru. Berarti akan diuji ulang sebanyak 15 kali kan. Sampai akhirnya 1000 fitur terdapat dalam aplikasi, apakah masih efektif dengan menguji secara manual untuk fitur atau bagian aplikasi tersebut? Tentunya kita memerlukan cara yang lebih ringkas dan menghemat waktu agar waktu kita tidak habis pada pekerjaan yang sama.
+
+Di modul ini Anda dapat mempelajari *automated software testing* di Django yang dapat menjadi bekal Anda untuk mengembangkan aplikasi *web* Django yang cukup bebas dari *bug* yang tidak terduga. Ada banyak pengujian lainnya seperti *acceptance testing* dengan menggunakan Selenium. Namun kita akan mencoba dasarnya terlebih dahulu.
+
+##Membuat testing untuk semua views aplikasi nilai online
+
+Anda dapat mulai menyalin kode berikut ke dalam *file* **homepage/tests.py**:
+
+```
+from django.test import TestCase, Client
+from django.contrib.auth.models import User
+
+from akses.models import *
+from tatausaha.models import *
+
+# Create your tests here.
+class HomepageTest(TestCase):
+	def setUp(self):
+		user = User.objects.create_user('ridwanbejo', 'rahasia123')
+		user.email = "ridwanbejo@gmail.com"
+		user.save()
+
+		mahasiswa = Mahasiswa.objects.create(nama="Ridwan Bejo")
+		mahasiswa.save()
+
+		akun = Akun.objects.create(mahasiswa=mahasiswa, user=user, no_telp="7501234", alamat="bandung", website="http://poss.cs.upi.edu")
+		akun.save()
+
+		self.user = user
+		self.client = Client()
+
+	def test_view_login(self):
+		response = self.client.get('/login/')
+		self.assertEqual(response.status_code, 200)
+
+	def test_do_login(self):
+		response = self.client.post('/login/', {'username':'ridwanbejo', 'password':'rahasia123'}, follow=True)
+		self.assertEqual(response.status_code, 200)
+	
+	def test_view_daftar_nilai(self):
+		self.client.login(username='ridwanbejo', password='rahasia123')
+		response = self.client.get('/', follow=True)
+		self.assertEqual(response.status_code, 200)	
+
+	def test_view_profil(self):
+		self.client.login(username='ridwanbejo', password='rahasia123')
+		response = self.client.get('/profil/', follow=True)
+		self.assertEqual(response.status_code, 200)	
+	
+	def test_view_edit_profil(self):
+		self.client.login(username='ridwanbejo', password='rahasia123')
+		response = self.client.get('/profil/edit', follow=True)
+		self.assertEqual(response.status_code, 200)	
+	
+	def test_do_edit_profil(self):
+		self.client.login(username='ridwanbejo', password='rahasia123')
+		response = self.client.post('/profil/edit', {
+					'first_name':'ridwan',
+					'last_name':'fajar',
+					'email':'ridwanfajar@gmail.com',
+					'alamat':'bojong soang',
+					'no_telp':'7501234',
+					'website':'http://www.example.com'
+			} ,follow=True)
+		
+		self.assertEqual(response.status_code, 200)	
+		
+	def test_do_logout(self):
+		self.client.login(username='ridwanbejo', password='rahasia123')
+		response = self.client.get('/logout/')
+		self.assertEqual(response.status_code, 302)
+```
+
+##Menjalankan testing
+
+Sekarang mari kita jalankan *test* yang telah kita buat diatas dengan menggunakan **manage.py**:
+
+```
+$ python manage.py test
+Creating test database for alias 'default'...
+.None
+......
+----------------------------------------------------------------------
+Ran 7 tests in 0.107s
+
+OK
+Destroying test database for alias 'default'...
+```
+
+```
+$ python manage.py test -v=3
+Creating test database for alias 'default' (':memory:')...
+Operations to perform:
+  Synchronize unmigrated apps: staticfiles, messages
+  Apply all migrations: sessions, admin, auth, kuliah, contenttypes, tatausaha, akses
+Running pre-migrate handlers for application admin
+Running pre-migrate handlers for application auth
+Running pre-migrate handlers for application contenttypes
+Running pre-migrate handlers for application sessions
+Running pre-migrate handlers for application tatausaha
+Running pre-migrate handlers for application kuliah
+Running pre-migrate handlers for application homepage
+Running pre-migrate handlers for application akses
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Rendering model states... DONE (0.000s)
+  Applying contenttypes.0001_initial... OK (0.011s)
+  Applying auth.0001_initial... OK (0.028s)
+  Applying admin.0001_initial... OK (0.017s)
+  Applying admin.0002_logentry_remove_auto_add... OK (0.020s)
+  Applying tatausaha.0001_initial... OK (0.013s)
+  Applying akses.0001_initial... OK (0.044s)
+  Applying akses.0002_auto_20160829_2344... OK (0.065s)
+  Applying akses.0003_auto_20160830_0021... OK (0.047s)
+  Applying contenttypes.0002_remove_content_type_name... OK (0.058s)
+  Applying auth.0002_alter_permission_name_max_length... OK (0.022s)
+  Applying auth.0003_alter_user_email_max_length... OK (0.024s)
+  Applying auth.0004_alter_user_username_opts... OK (0.022s)
+  Applying auth.0005_alter_user_last_login_null... OK (0.021s)
+  Applying auth.0006_require_contenttypes_0002... OK (0.001s)
+  Applying auth.0007_alter_validators_add_error_messages... OK (0.026s)
+  Applying kuliah.0001_initial... OK (0.060s)
+  Applying kuliah.0002_auto_20160825_0450... OK (0.032s)
+  Applying kuliah.0003_auto_20160825_0454... OK (0.212s)
+  Applying kuliah.0004_auto_20160825_1610... OK (0.026s)
+  Applying kuliah.0005_auto_20160825_1615... OK (0.090s)
+  Applying sessions.0001_initial... OK (0.005s)
+Running post-migrate handlers for application admin
+Adding permission 'admin | log entry | Can add log entry'
+Adding permission 'admin | log entry | Can change log entry'
+Adding permission 'admin | log entry | Can delete log entry'
+Running post-migrate handlers for application auth
+Adding permission 'auth | permission | Can add permission'
+Adding permission 'auth | permission | Can change permission'
+Adding permission 'auth | permission | Can delete permission'
+Adding permission 'auth | group | Can add group'
+Adding permission 'auth | group | Can change group'
+Adding permission 'auth | group | Can delete group'
+Adding permission 'auth | user | Can add user'
+Adding permission 'auth | user | Can change user'
+Adding permission 'auth | user | Can delete user'
+Running post-migrate handlers for application contenttypes
+Adding permission 'contenttypes | content type | Can add content type'
+Adding permission 'contenttypes | content type | Can change content type'
+Adding permission 'contenttypes | content type | Can delete content type'
+Running post-migrate handlers for application sessions
+Adding permission 'sessions | session | Can add session'
+Adding permission 'sessions | session | Can change session'
+Adding permission 'sessions | session | Can delete session'
+Running post-migrate handlers for application tatausaha
+Adding permission 'tatausaha | dosen | Can add dosen'
+Adding permission 'tatausaha | dosen | Can change dosen'
+Adding permission 'tatausaha | dosen | Can delete dosen'
+Adding permission 'tatausaha | mahasiswa | Can add mahasiswa'
+Adding permission 'tatausaha | mahasiswa | Can change mahasiswa'
+Adding permission 'tatausaha | mahasiswa | Can delete mahasiswa'
+Adding permission 'tatausaha | ruangan | Can add ruangan'
+Adding permission 'tatausaha | ruangan | Can change ruangan'
+Adding permission 'tatausaha | ruangan | Can delete ruangan'
+Running post-migrate handlers for application kuliah
+Adding permission 'kuliah | mata kuliah | Can add mata kuliah'
+Adding permission 'kuliah | mata kuliah | Can change mata kuliah'
+Adding permission 'kuliah | mata kuliah | Can delete mata kuliah'
+Adding permission 'kuliah | jadwal kuliah | Can add jadwal kuliah'
+Adding permission 'kuliah | jadwal kuliah | Can change jadwal kuliah'
+Adding permission 'kuliah | jadwal kuliah | Can delete jadwal kuliah'
+Adding permission 'kuliah | kontrak kuliah | Can add kontrak kuliah'
+Adding permission 'kuliah | kontrak kuliah | Can change kontrak kuliah'
+Adding permission 'kuliah | kontrak kuliah | Can delete kontrak kuliah'
+Running post-migrate handlers for application homepage
+Running post-migrate handlers for application akses
+Adding permission 'akses | akun | Can add akun'
+Adding permission 'akses | akun | Can change akun'
+Adding permission 'akses | akun | Can delete akun'
+test_do_edit_profil (homepage.tests.HomepageTest) ... ok
+test_do_login (homepage.tests.HomepageTest) ... None
+ok
+test_do_logout (homepage.tests.HomepageTest) ... ok
+test_view_daftar_nilai (homepage.tests.HomepageTest) ... ok
+test_view_edit_profil (homepage.tests.HomepageTest) ... ok
+test_view_login (homepage.tests.HomepageTest) ... ok
+test_view_profil (homepage.tests.HomepageTest) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.084s
+
+OK
+Destroying test database for alias 'default' (':memory:')...
+```
+
+Dengan melakukan *automated software testing* seperti diatas, maka ketika ada fitur baru, kita buat lagi skenario *testing* untuk fitur baru tersebut, dan cukup Django yang memeriksa ulang kembali apakah ada *error* yang diakibatkan fitur baru tersebut terhadap fitur yang sudah ada sebelumnya.
+
+Semoga bermanfaat :D
