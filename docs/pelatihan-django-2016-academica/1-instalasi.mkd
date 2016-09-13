@@ -60,7 +60,7 @@ $ python manage.py runserver
 
 Berikut adalah tampilan awal Django saat baru pertama kali dijalankan:
 
--- gambar django pertama kali
+![test](screenshot/part1/1.png)
 
 Sekarang mari kita lakukan migrasi tabel untuk membuat tabel - tabel *default* Django:
 

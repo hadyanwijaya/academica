@@ -150,11 +150,11 @@ Silahkan buat kode *template* berikut di dalam *file* **homepage/templates/login
 
 Dan berikut adalah tampilan halaman *login* dalam berbagai kondisi:
 
--- gambar login gagal
+![test](screenshot/part3/5.png)
 
--- gambar login
+![test](screenshot/part3/6.png)
 
--- gambar login sukses
+![test](screenshot/part3/7.png)
 
 ##Membuat Halaman Index
 
@@ -208,7 +208,6 @@ def logout_view(request):
 	return redirect('/login/')
 ```
 
--- gambar logout
-
+![test](screenshot/part3/8.png)
 
 Modul ketiga sudah beres, dan saatnya kita ke modul terakhir :D

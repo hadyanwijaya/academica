@@ -51,7 +51,7 @@ Hi, {{ request.session.username }} | <a href="/">Home</a> |  <a href="/profil/ed
 
 Pada kode diatas, kita dapat melihat bagaimana cara mengakses data *session* di Django, kemudian kita juga mencoba menampilkan data dari *user* yang sedang *login* dan mengakses data yang ada di dalam objek akun. Bila kita lihat di *web browser* maka akan tampil seperti berikut:
 
--- gambar profil
+![test](screenshot/part4/0.png)
 
 ##Membuat Fitur Ubah Profil
 
@@ -148,12 +148,10 @@ Sedangkan berikut adalah *form* untuk mengubah profil. Silahkan buat *file* baru
 
 Berikut adalah tampilan halaman ubah profil:
 
--- gambar halaman profil
+![test](screenshot/part4/1.png)
 
--- gambar halaman profil validasi error
+![test](screenshot/part4/2.png)
 
--- gambar halaman profil validasi error
+![test](screenshot/part4/3.png)
 
--- gambar halaman profil berhasil berubah
-
--- gambar data profil berubah di halaman django admin
+![test](screenshot/part4/4.png)

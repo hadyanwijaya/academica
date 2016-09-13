@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="generator" content="ReText 4.1.2">
+<title>3-autentikasi</title>
+</head>
+<body>
+<h1>Pelatihan Django 2016 #3 - Autentikasi dan Halaman Index</h1>
+<p>Autentikasi adalah salah satu kewajiban bila Anda ingin membuat sebuah fitur dari aplikasi <em>web</em> yang hanya dapat diakses oleh <em>user</em> tertentu. Umumnya autentikasi terdiri dari dua proses yaitu <em>login</em> dan <em>logout</em>, setelah <em>login</em> maka kita dapat menyimpan beberapa data di <em>session</em> untuk digunakan terus di berbagai halaman lain. Di tutorial ini, kita akan menggunakan sistem autentikasi Django. Kita juga akan menggunakan pembatas untuk setiap <em>views</em> yang dinamakan dengan <em>decorator</em>.</p>
+<p>Jadi di kode <strong>homepage/views.py</strong> ini, kita akan melihat ada beberapa <em>views</em> yang diatasnya terdapat sebuah <em>decorator</em> dengan nama <strong>login_required()</strong>. Oleh karena itu mari kita lanjutkan tutorial ini.</p>
+<h2>Persiapan</h2>
+<p>Sekarang kita persiapkan berbagai <em>views</em> yang akan kita bangun di <em>apps</em> <strong>homepage</strong>. Sebelum membuat berbagai <em>views</em>, kita <em>import</em> terlebih dahulu modul Django dan <em>models</em> di <em>apps</em> lain yang akan diperlukan. Kemudian kita buat juga kerangka untuk <em>views</em> <em>login</em>, <em>logout</em>, dan <em>index</em>. Silahkan buat kode berikut di dalam <strong>homepage/views.py</strong>:</p>
+<pre><code>from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, logout, login
+from django.contrib import messages
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+
+from kuliah.models import *
+from homepage.forms import *
+from akses.models import *
+
+# Create your views here.
+def login_view(request):
+    return HttpResponse('login...')
+
+def logout_view(request):
+    return HttpResponse('logout...')
+
+def daftar_nilai(request):
+    return HttpResponse('daftar nilai...')
+</code></pre>
+
+<h2>Membuat Model Form Akun dan User</h2>
+<p>Kemudian sekarang kita buat juga beberapa <em>form</em> yang akan digunakan untuk proses validasi data yang dikirim dengan <em>method</em> POST. Data yang akan divalidasi adalah biodata mahasiswa dan <em>user</em> yang akan diisi saat mengubah profil. <em>Form</em> Django dapat menghasilkan elemen <em>form</em> secara otomatis hanya dengan memanggil namanya saja di dalam <em>template</em>. Kemudian <em>widget</em> setiap <em>form</em> pun dapat diatur jenis <em>input</em>-nya agar disesuaikan dengan kebutuhan kita, misal ada <strong>TextInput()</strong> dan <strong>Textarea()</strong>. </p>
+<p>Karena kita akan menggunakan <strong>ModelForm</strong>, Django dapat membantu kita memvalidasi data yang dikirimkan sesuai definisi yang ada di <strong>models.py</strong>. Sehingga data yang dikirimkan akan dijamin sesuai dengan tabel yang akan dibuat nantinya. Sekarang silahkan buat dulu <em>file</em> dengan nama <strong>forms.py</strong> di dalam <em>folder</em> <strong>homepage</strong>. Kemudian buat kode berikut di dalam <em>file</em> <strong>homepage/forms.py</strong>:</p>
+<pre><code>from django import forms
+from django.contrib.auth.models import User
+from akses.models import Akun
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'nama_depan': forms.TextInput(),
+            'nama_belakang': forms.TextInput(),
+            'email': forms.TextInput(),
+        }
+
+class AkunForm(forms.ModelForm):
+    class Meta:
+        model = Akun
+        fields = ['no_telp', 'alamat', 'website']
+        widgets = {
+            'no_telp': forms.TextInput(),
+            'alamat': forms.Textarea(),
+            'website': forms.TextInput()
+        }
+
+</code></pre>
+
+<p>Kode tersebut akan digunakan di <em>views</em> mengubah profil nantinya.</p>
+<h2>Menyiapkan urls.py</h2>
+<p>Sebelum melanjutkan koding, sekarang kita tambahkan dulu <em>url</em> di <strong>academica/urls.py</strong> untuk menghubungkan <em>views</em> dengan URL yang diinginkan. Kita hanya akan menyambungkan tiga URL dahulu. Silahkan sesuaikan <strong>urlpatterns</strong> dan <em>import</em> seperti pada kode berikut:</p>
+<pre><code>from django.conf.urls import url
+from django.contrib import admin
+from homepage import views as home_views
+
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+    url(r'^$', home_views.daftar_nilai),
+    url(r'^login/$', home_views.login_view),
+    url(r'^logout/$', home_views.logout_view),
+]
+
+</code></pre>
+
+<h2>Membuat Login</h2>
+<p>Untuk proses <em>login</em>, kodenya cukup <em>tricky</em> dimana kita akan memeriksa terlebih dahulu apakah <em>request</em> yang datang adalah <em>POST</em> atau bukan. Kemudian kita <em>authenticate</em> terlebih dahulu apakah <em>user</em> sudah terdaftar ke sistem atau belum. Apabila tidak <em>user</em> tersebut di sistem maka akunnya salah. Bila ada, maka akan diperiksa apakah <em>user</em> sudah aktif atau belum. Bila sudah aktif maka akan diperiksa lagi apakah sudah terhubung ke data mahasiswa atau belum karena hal ini dilakukan untuk dapat mengambil data nilai dan data profil mahasiswa sesaat <em>user</em> tersebut berhasil <em>login</em>. Terakhir akan kita simpan beberapa data di <em>session</em>.</p>
+<p>Silahkan buat <em>views</em> <strong>login_view</strong> di dalam <em>file</em> <strong>homepage/views.py</strong>:</p>
+<pre><code>ef login_view(request):
+    if request.POST:
+        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        if user is not None:
+            if user.is_active:
+                try:
+                    akun = Akun.objects.get(user=user)
+                    login(request, user)
+
+                    print akun
+
+                    request.session['username'] = request.POST['username']
+                    request.session['email'] = akun.user.email
+
+                except Exception, e:
+                    print e
+                    messages.add_message(request, messages.INFO, 'Akun ini belum terhubung dengan data mahasiswa, silahkan hubungi administrator')
+
+                return redirect('/')
+            else:   
+                messages.add_message(request, messages.INFO, 'Anda belum terverifikasi, silahkan hubungi administrator')
+        else:
+            messages.add_message(request, messages.INFO, 'Akun Anda salah')
+
+    return render(request, 'login.html')
+</code></pre>
+
+<p>Karena kita akan menggunakan <em>template</em> alias HTML, maka kita akan membuat sebuah kode HTML yang ditenagai oleh sistem <em>template</em> Django. Di dalam sebuah <em>form</em> Django, Anda tidak dapat begitu saja membuat <em>form</em>, Anda harus membubuhkan <strong>csrf_token</strong> agar <em>form</em> Anda dipastikan aman oleh Django.</p>
+<p>Silahkan buat kode <em>template</em> berikut di dalam <em>file</em> <strong>homepage/templates/login.html</strong>:</p>
+<pre><code>&lt;h1&gt;Silahkan Login&lt;/h1&gt;
+
+&lt;form action=&quot;/login/&quot; method=&quot;POST&quot; role=&quot;form&quot;&gt;
+    {% csrf_token %}
+
+    {% if messages %}
+              &lt;ul&gt;
+                {% for message in messages %}
+                  &lt;li&gt;{{ message }}&lt;/li&gt;
+                {% endfor %}
+              &lt;/ul&gt;
+            {% endif %}
+
+    Username: 
+
+    &lt;input type=&quot;text&quot; name=&quot;username&quot; value=&quot;&quot; placeholder=&quot;username anda...&quot; /&gt;
+
+    &lt;br/&gt;
+    &lt;br/&gt;
+
+    Password: 
+    &lt;input type=&quot;password&quot; name=&quot;password&quot; value=&quot;&quot; placeholder=&quot;password anda...&quot; /&gt;
+
+    &lt;br/&gt;
+    &lt;br/&gt;
+    &lt;input href=&quot;javascript:void(0);&quot; value=&quot;Log In&quot; type=&quot;submit&quot;/&gt;
+&lt;/form&gt;
+</code></pre>
+
+<p>Dan berikut adalah tampilan halaman <em>login</em> dalam berbagai kondisi:</p>
+<p><img alt="test" src="screenshot/part3/5.png" width="500px"></p>
+<p><img alt="test" src="screenshot/part3/6.png" width="500px"></p>
+<p><img alt="test" src="screenshot/part3/7.png" width="500px"></p>
+<h2>Membuat Halaman Index</h2>
+<p>Untuk halaman <em>index</em> akan kita arahkan ke <em>views</em> <strong>daftar_nilai</strong> dimana <em>views</em> tersebut akan dilindungi oleh <em>decorator</em> <strong>login_required()</strong>.  Kemudian kita ambil data akun yang id-nya disimpan di <em>session</em>. Kemudian setelah dapat data akun maka kita ambil data kuliah yang dikontrak mahasiswa tersebut dan diurut berdasarkan jadwal kuliah. Kemudian data hasil <em>query</em> akan ditampilkank di <em>view</em> <strong>homepage/templates/index.html</strong>:</p>
+<pre><code>@login_required(login_url=settings.LOGIN_URL)
+def daftar_nilai(request):
+    akun = Akun.objects.get(user=request.user.id)
+    daftar_kontrak_kuliah = KontrakKuliah.objects.filter(mahasiswa=akun.mahasiswa).order_by('-jadwal_kuliah__mulai_kuliah')
+    return render(request, 'index.html', {'daftar_kontrak_kuliah':daftar_kontrak_kuliah})
+</code></pre>
+
+<p>template.html:</p>
+<pre><code>&lt;h1&gt;Daftar Nilai&lt;/h1&gt;
+
+Hi, {{ request.session.username }} | &lt;a href=&quot;/profil/&quot;&gt;Profil&lt;/a&gt; | &lt;a href=&quot;/logout/&quot;&gt;Log out&lt;/a&gt; | 
+
+&lt;br/&gt; &lt;br/&gt;
+
+&lt;table border=&quot;1&quot;&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th&gt;No.&lt;/th&gt;
+            &lt;th&gt;Kontrak Kuliah&lt;/th&gt;
+            &lt;th&gt;Nilai Terakhir&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        {% for kontrak in daftar_kontrak_kuliah %}
+        &lt;tr&gt;
+            &lt;td&gt;{{ forloop.counter }}&lt;/td&gt;
+            &lt;td&gt;{{ kontrak.jadwal_kuliah.nama }}&lt;/td&gt;
+            &lt;td&gt;{{ kontrak.nilai_akhir }}&lt;/td&gt;
+        &lt;/tr&gt;
+        {% endfor %}
+    &lt;/tbody&gt;
+&lt;/table&gt;
+</code></pre>
+
+<p>-- gambar index</p>
+<h2>Membuat Logout</h2>
+<p>Kode untuk <em>logout</em> lebih sederhana. Anda cukup melewatkan <strong>request</strong> pada <em>method</em> <strong>logout()</strong> kemudian me-<em>redirect</em> halaman ke halaman <em>login</em>. Silahkan buat kode <em>logout</em> berikut di <strong>homepage/views.py</strong>:</p>
+<pre><code>def logout_view(request):
+    logout(request)
+    return redirect('/login/')
+</code></pre>
+
+<p><img alt="test" src="screenshot/part3/8.png" width="500px"></p>
+<p>Modul ketiga sudah beres, dan saatnya kita ke modul terakhir :D</p>
+</body>
+</html>

@@ -171,12 +171,13 @@ admin.site.register(Akun)
 
 Setelah semuanya berhasil disambungkan, maka model siap dikelola melalui Django Admin. Tentunya suatu saat nanti, Anda ingin membuat halaman sendiri tanpa harus melalui Django Admin. Berikut adalah beberapa tampilan ketika *models* berhasil diintegrasikan dengan halaman Django Admin:
 
--- gambar depan
+![test](screenshot/part2/1.png)
 
--- gambar admin tatausaha
+![test](screenshot/part2/2.png)
 
--- gambar admin kuliah
+![test](screenshot/part2/3.png)
 
--- gambar admin akses
+![test](screenshot/part2/4.png)
+
 
 Modul kedua sudah selesai, saatnya sekarang modul ketiga akan beraksi :D.

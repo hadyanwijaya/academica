@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="generator" content="ReText 4.1.2">
+<title>2-model-admin</title>
+</head>
+<body>
+<h1>Pelatihan Django 2016 #2 - Model dan Admin</h1>
+<p>Salah satu komponen yang ada di Django adalah Model. Model adalah sebuah <em>class</em> yang merepresentasikan tabel di <em>database</em>. Karena saat ini Django masih mendukung <em>relational database</em> secara <em>default</em>, Django mendukung <em>database</em> seperti Oracle, PostgreSQL, MySQL, dan SQLite3 tanpa harus memasang lagi <em>package</em> tamabahan. Bila ingin menggunakan <em>database</em> diluar yang didukung Django, Anda harus memasang <em>package</em> yang sesuai untuk <em>database</em> tersebut.</p>
+<p>Django akan mempermudah Anda untuk tidak membuat tabel sendiri melalui SQL, cukup dengan membuat <em>class</em> seperti pada modul ini dan <em>voilla</em>, Anda akan mendapatkan tabel yang diinginkan di <em>database</em> yang akan Anda gunakan. Tentunya dengan beberapa tabel bawaan Django dan tabel yang dibuatkan oleh Django. Sehingga <em>programmer</em> hanya perlu fokus untuk mewujudkan bisnis proses dan menentukan model yang baik dan cocok untuk aplikasi <em>web</em> yang dikembangkannya.</p>
+<h2>Membuat Model di Apps tatausaha</h2>
+<p>Pertama mari kita buat terlebih dahulu beberapa Model di <em>apps</em> <strong>tatausaha</strong>. Silahkan buat kode berikut di dalam <em>file</em> <strong>tatausaha/models.py</strong>:</p>
+<pre><code>from __future__ import unicode_literals
+
+from django.db import models
+
+# Create your models here.
+class Dosen(models.Model):
+    nama = models.CharField(max_length=200)
+    alamat = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.nama
+
+class Mahasiswa(models.Model):
+    nama = models.CharField(max_length=200)
+    alamat = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.nama
+
+class Ruangan(models.Model):
+    nama = models.CharField(max_length=100)
+    deskripsi = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.nama
+</code></pre>
+
+<p>Kita jelaskan dulu secara garis besar, misal model Dosen, dia mewarisi <em>class</em> <strong>Model</strong> yang dimiliki oleh modul <strong>models</strong>. Kemudian di dalamnya terdapat dua <em>field</em> yang eksplisit yaitu <strong>nama</strong> dan <strong>alamat</strong>. <em>Field</em> <strong>nama</strong> dibentuk dengan <strong>CharField</strong> dengan panjang maksimal 200 karakter, dan <strong>alamat</strong> dibentuk dengan <strong>TextField</strong> dan kita akan membolehkannya kosong jika tidak akan diisi. Kemudian ada <em>method</em> <strong> _ <em> _ unicode _ </em> _ </strong> yang berfungsi untuk mencetak baris tabel dalam bentuk string. Jadi bila nanti kita mencetak objek model maka akan keluar nama dari Dosen yang kita cetak.</p>
+<p>Perlu Anda ketahui, bahwa Django membuatkan <em>field</em> <strong>id</strong> secara otomatis walaupun tidak didefinisikan di dalam <em>models</em>. Jadi Anda tidak perlu khawatir dengan masalah <em>primary key</em> terlebih dahulu. Django pun membuatkan beberapa <em>index</em> secara otomatis, namun kita juga dapat menentukan mana yang harus di-<em>index</em>. </p>
+<h2>Membuat Model di Apps kuliah</h2>
+<p>Sekarang kita akan membuat model yang menjadi inti dari aplikasi nilai <em>online</em> kita. kita akan membuat tiga model di <em>apps</em> <strong>kuliah</strong> ini. Pertama model MataKuliah, lalu JadwalKuliah, dan KontrakKuliah. Di bagian modul ini, Anda akan mulai menggunakan relasi antar model yang merepresentasikan relasi antar tabel. Silahkan buat kode berikut di dalam <em>file</em> <strong>kuliah/models.py</strong>:</p>
+<pre><code>from __future__ import unicode_literals
+
+from django.db import models
+from tatausaha.models import *
+
+# Create your models here.
+class MataKuliah(models.Model):
+    nama = models.CharField(max_length=200)
+    deskripsi = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.nama
+
+
+class JadwalKuliah(models.Model):
+    nama = models.CharField(max_length=200)
+    deskripsi = models.TextField(blank=True)
+    dosen = models.ForeignKey(Dosen)
+    kelas = models.ForeignKey(Ruangan)
+    mulai_kuliah = models.TimeField(blank=True)
+    akhir_kuliah = models.TimeField(blank=True)
+    mulai_kontrak = models.DateField(blank=True)
+    akhir_kontrak = models.DateField(blank=True)
+    tahun = models.IntegerField(blank=True)
+
+    def __unicode__(self):
+        return self.nama
+
+class KontrakKuliah(models.Model):
+    SEMESTER_TYPE = (
+        (&quot;semester_1&quot;,&quot;Semester 1&quot;),
+        (&quot;semester_2&quot;,&quot;Semester 2&quot;),
+        (&quot;semester_3&quot;,&quot;Semester 3&quot;),
+        (&quot;semester_4&quot;,&quot;Semester 4&quot;),
+        (&quot;semester_5&quot;,&quot;Semester 5&quot;),
+        (&quot;semester_6&quot;,&quot;Semester 6&quot;),
+        (&quot;semester_7&quot;,&quot;Semester 7&quot;),
+        (&quot;semester_8&quot;,&quot;Semester 8&quot;),
+        (&quot;semester_9&quot;,&quot;Semester 9&quot;),
+        (&quot;semester_10&quot;,&quot;Semester 10&quot;),
+        (&quot;semester_11&quot;,&quot;Semester 11&quot;),
+        (&quot;semester_12&quot;,&quot;Semester 12&quot;),
+        (&quot;semester_pendek&quot;,&quot;Semester Pendek&quot;),
+    )
+
+    jadwal_kuliah = models.ForeignKey(JadwalKuliah)
+    mahasiswa = models.ForeignKey(Mahasiswa)
+    nilai_akhir = models.CharField(max_length=2)
+    semester = models.CharField(max_length=50, choices=SEMESTER_TYPE, default=&quot;semester_1&quot;)
+
+    def __unicode__(self):
+        return &quot;%s mengontrak %s&quot; %(self.mahasiswa.nama, self.jadwal_kuliah.nama)
+
+</code></pre>
+
+<p>Karena disini akan terjadi relasi antar model, maka kita <em>import</em> model yang akan berelasi dengan model yang ada di <em>apps</em> <strong>kuliah</strong>. Untuk tabel MataKuliah masih mirip dengan <em>model</em> lain di kode sebelumnya. Anda dapat melihat ada <strong>ForeignKey</strong> di dalam model KontrakKuliah dan JadwalKuliah. Model JadwalKuliah berelasi ke model Ruangan dan Dosen yang ada di <em>apps</em> <strong>tatausaha</strong>. Sedangkan <strong>ForeignKey</strong> di model <strong>KontrakKuliah</strong> bereleasi ke model JadwalKuliah yang berada di <em>apps</em> yang sama dan model Mahasiswa yang berada di <em>apps</em> <strong>tatausaha</strong>. </p>
+<p>Anda juga dapat melihat <em>field</em> lain seperti <strong>TimeField</strong>, <strong>DateField</strong>, dan <strong>IntegerField</strong>. Kemudian ada juga bentuk <em>choices</em> yang nantinya akan menjadi <strong>select</strong> atau <strong>dropdown</strong> saat <em>field</em> tersebut ditampilkan di Django Admin. Django sendiri memiliki dua <em>field</em> penting untuk melakukan relasi, yaitu <strong>ForeingKey</strong> dan <strong>ManyToManyField</strong>. Anda dapat membaca dokumentasi Django untuk lebih lengkapnya.</p>
+<h2>Membuat Model di Apps akses</h2>
+<p>Dan terakhir kita akan membuat sebuah model bernama Akun yang menghubungkan <em>user</em> Django dengan data mahasiswa, di dalamnya pun terdapat <em>field</em> yang menunjang untuk keperluan biodata yang dapat diedit oleh mahasiswa. Silahkan buat kode berikut di dalam <em>file</em> <strong>akses/models.py</strong>:</p>
+<pre><code>from __future__ import unicode_literals
+
+from django.db import models
+from django.contrib.auth.models import User
+from tatausaha.models import *
+
+# Create your models here.
+class Akun(models.Model):
+    mahasiswa = models.ForeignKey(Mahasiswa)
+    user = models.ForeignKey(User)
+    no_telp = models.CharField(max_length=50)
+    alamat = models.TextField()
+    website = models.CharField(blank=True, max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.mahasiswa.nama + &quot; --- &quot; + self.user.username
+</code></pre>
+
+<h2>Memasang Model ke Django Admin</h2>
+<p>Karena <em>database</em> yang akan kita gunakan sementara ini adalah SQLite3, maka setelah berhasil migrasi, tabel - tabel yang didefinisikan di model akan dibuat di dalam <strong>db.sqlite3</strong>. Sehingga Anda memerlukan aplikasi <em>client</em> untuk SQLite3 untuk melihat isi <em>database</em> tersebut. Sekarang mari kita migrasi seluru model yang ada di <em>apps</em> - <em>apps</em> yang telah kita buat ke <em>database</em> SQLite3:</p>
+<pre><code>$ python manage.py migrate
+</code></pre>
+
+<p>Setelah berhasil dimigrasi, saatnya kita menyambungkan model dengan halaman Django Admin. Pertama kita sambungkan dulu semua model yang ada di <em>apps</em> <strong>tatausaha</strong> ke Django Admin. Silahkan buat kode berikut di dalam <em>file</em> <strong>tatausaha/admin.py</strong>:</p>
+<pre><code>from django.contrib import admin
+from tatausaha.models import *
+
+# Register your models here.
+admin.site.register(Dosen)
+admin.site.register(Mahasiswa)
+admin.site.register(Ruangan)
+</code></pre>
+
+<p>Berikutnya kita sambungkan dulu semua model yang ada di <em>apps</em> <strong>kuliah</strong> ke Django Admin. Silahkan buat kode berikut di dalam <em>file</em> <strong>kuliah/admin.py</strong>:</p>
+<pre><code>from django.contrib import admin
+from kuliah.models import *
+
+# Register your models here.
+admin.site.register(MataKuliah)
+admin.site.register(JadwalKuliah)
+admin.site.register(KontrakKuliah)
+</code></pre>
+
+<p>Terakhir kita sambungkan dulu semua model yang ada di <em>apps</em> <strong>akses</strong> ke Django Admin. Silahkan buat kode berikut di dalam <em>file</em> <strong>akses/admin.py</strong>:</p>
+<pre><code>from django.contrib import admin
+from .models import *
+
+# Register your models here.
+admin.site.register(Akun)
+</code></pre>
+
+<p>Setelah semuanya berhasil disambungkan, maka model siap dikelola melalui Django Admin. Tentunya suatu saat nanti, Anda ingin membuat halaman sendiri tanpa harus melalui Django Admin. Berikut adalah beberapa tampilan ketika <em>models</em> berhasil diintegrasikan dengan halaman Django Admin:</p>
+<p><img alt="test" src="screenshot/part2/1.png" width="500px"></p>
+<p><img alt="test" src="screenshot/part2/2.png" width="500px"></p>
+<p><img alt="test" src="screenshot/part2/3.png" width="500px"></p>
+<p><img alt="test" src="screenshot/part2/4.png" width="500px"></p>
+<p>Modul kedua sudah selesai, saatnya sekarang modul ketiga akan beraksi :D.</p>
+</body>
+</html>
