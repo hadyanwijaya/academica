@@ -18,12 +18,13 @@ class JadwalKuliah(models.Model):
 	deskripsi = models.TextField(blank=True)
 	dosen = models.ForeignKey(Dosen)
 	kelas = models.ForeignKey(Ruangan)
+	mata_kuliah = models.ForeignKey(MataKuliah, blank=True, default=None)
 	mulai_kuliah = models.TimeField(blank=True)
 	akhir_kuliah = models.TimeField(blank=True)
-	mulai_kontrak = models.DateField(blank=True)
-	akhir_kontrak = models.DateField(blank=True)
-	tahun = models.IntegerField(blank=True)
-	
+	mulai_kontrak = models.DateField(blank=True, default=None)
+	akhir_kontrak = models.DateField(blank=True, default=None)
+	tahun = models.IntegerField(blank=True, default=2000)
+
 	def __unicode__(self):
 		return self.nama
 	
@@ -48,6 +49,7 @@ class KontrakKuliah(models.Model):
 	mahasiswa = models.ForeignKey(Mahasiswa)
 	nilai_akhir = models.CharField(max_length=2)
 	semester = models.CharField(max_length=50, choices=SEMESTER_TYPE, default="semester_1")
+	tanggal_kontrak = models.DateField(blank=True, default=None)
 	
 	def __unicode__(self):
 		return "%s mengontrak %s" %(self.mahasiswa.nama, self.jadwal_kuliah.nama)

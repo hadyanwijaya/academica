@@ -1,0 +1,41 @@
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+
+        <!-- Sidebar Menu for Member-->
+        <ul class="sidebar-menu">
+          {{ request.session.roles }}
+          
+          {% if request.session.roles == "member" %}
+          {% endif %}
+
+          <li class="header">Member Area</li>
+
+          <li class="treeview">
+            <a href="#"><i class="fa fa-table"></i> <span>Akademik</span>
+              <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+            </a>
+            <ul class="treeview-menu">
+              <li><a href="/">Rekap Nilai</a></li>
+            </ul>
+          </li> 
+          <li class="treeview">
+            <a href="#"><i class="fa fa-link"></i> <span>Layanan Mahasiswa</span>
+              <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+            </a>
+            <ul class="treeview-menu">
+              <li><a href="/dashboard/my_backers_log">Tanya Jawab</a></li>
+            </ul>
+          </li>
+          
+          
+      <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+  </aside>

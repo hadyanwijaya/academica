@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^logout/$', home_views.logout_view),
     url(r'^profil/$', home_views.profil),
     url(r'^profil/edit$', home_views.profil_edit),
+    url(r'^test_adminlte$', home_views.test_adminlte),
 ]

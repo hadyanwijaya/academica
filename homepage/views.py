@@ -36,7 +36,7 @@ def login_view(request):
 		else:
 			messages.add_message(request, messages.INFO, 'Akun Anda salah')
 
-	return render(request, 'login.html')
+	return render(request, 'new/login.html')
 
 def logout_view(request):
 	logout(request)
@@ -46,7 +46,7 @@ def logout_view(request):
 def daftar_nilai(request):
 	akun = Akun.objects.get(user=request.user.id)
 	daftar_kontrak_kuliah = KontrakKuliah.objects.filter(mahasiswa=akun.mahasiswa).order_by('-jadwal_kuliah__mulai_kuliah')
-	return render(request, 'index.html', {'daftar_kontrak_kuliah':daftar_kontrak_kuliah})
+	return render(request, 'new/index.html', {'daftar_kontrak_kuliah':daftar_kontrak_kuliah})
 
 @login_required(login_url=settings.LOGIN_URL)
 def profil(request):
@@ -83,3 +83,6 @@ def profil_edit(request):
 		akun_form = AkunForm(instance=akun)
 
 	return render(request, 'profil_edit.html', {'user_form':user_form, 'akun_form':akun_form})
+
+def test_adminlte(request):
+	return render(request, 'test_adminlte.html')

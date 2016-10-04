@@ -15,9 +15,9 @@ class UserForm(forms.ModelForm):
 class AkunForm(forms.ModelForm):
 	class Meta:
 		model = Akun
-		fields = ['no_telp', 'alamat', 'website']
+		fields = ['no_telp', 'about_me', 'website']
 		widgets = {
             'no_telp': forms.TextInput(),
-            'alamat': forms.Textarea(),
+            'about_me': forms.Textarea(),
             'website': forms.TextInput()
         }

@@ -13,7 +13,7 @@ class Dosen(models.Model):
 class Mahasiswa(models.Model):
 	nama = models.CharField(max_length=200)
 	alamat = models.TextField(blank=True)
-
+	
 	def __unicode__(self):
 		return self.nama
 	

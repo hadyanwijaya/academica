@@ -8,8 +8,8 @@ from tatausaha.models import *
 class Akun(models.Model):
 	mahasiswa = models.ForeignKey(Mahasiswa)
 	user = models.ForeignKey(User)
-	no_telp = models.CharField(max_length=50)
-	alamat = models.TextField()
+	no_telp = models.CharField(max_length=50,blank=True)
+	about_me = models.TextField(blank=True)
 	website = models.CharField(blank=True, max_length=50)
 	created_at = models.DateTimeField(auto_now_add=True)
 
